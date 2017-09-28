@@ -13,7 +13,7 @@ function getBackendUrl(uri) {
     return constructUrl(browser.params.baseBackendUrl, uri);
 }
 
-function backendRequest(params, callback) {
+function backendRequest(params, callback, retry) {
     let cb = callback || function() { /* no-op */ };
 
     if (params.uri) {
@@ -26,7 +26,7 @@ function backendRequest(params, callback) {
     }
 
     // how many times it will try to request before throwing error
-    var ttl = 3;
+    let ttl = retry && 3 || 0;
 
     function responseHandler(error, response, body) {
         if (!error && !isErrorResponse(response)) {
@@ -53,7 +53,7 @@ function backendRequest(params, callback) {
     }
 
     params.rejectUnauthorized = false;
-    params.timeout = 30000;
+    params.timeout = params.timeout || 10000;
     request(params, responseHandler);
 }
 
