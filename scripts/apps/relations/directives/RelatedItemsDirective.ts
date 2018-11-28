@@ -19,6 +19,14 @@ export function RelatedItemsDirective(authoringWorkspace, relationsService) {
         },
         templateUrl: 'scripts/apps/relations/views/related-items.html',
         link: function(scope, elem, attr) {
+
+            scope.relatedItems = {};
+
+            relationsService.getRelatedItemsForField(scope.item, scope.field._id)
+                .then((res) => {
+                    scope.relatedItems = res;
+                });
+
             const dragOverClass = 'dragover';
             const allowed = ((scope.field || {}).field_options || {}).allowed_types || {};
             const ALLOWED_TYPES = Object.keys(allowed)
@@ -96,14 +104,6 @@ export function RelatedItemsDirective(authoringWorkspace, relationsService) {
 
                 return keys.length === 0;
             };
-
-            /**
-            * Get related items for fireldId
-            *
-            * @param {String} fieldId
-            * @return {[Object]}
-            */
-            scope.getRelatedItems = (fieldId) => relationsService.getRelatedItemsForField(scope.item, fieldId);
 
             /**
              * Reorder related items on related items list

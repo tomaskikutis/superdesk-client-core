@@ -1,8 +1,8 @@
 import {IArticle} from 'superdesk-interfaces/Article';
 
-RelationsService.$inject = ['archiveService'];
+RelationsService.$inject = ['archiveService', 'api'];
 
-export function RelationsService(archiveService) {
+export function RelationsService(archiveService, api) {
     this.getRelatedItems = function(item: IArticle) {
         if (!item.associations) {
             return [];
@@ -23,11 +23,16 @@ export function RelationsService(archiveService) {
     };
 
     this.getRelatedItemsForField = function(item: IArticle, fieldId: string) {
-        const related = this.getRelatedKeys(item, fieldId);
+        const associationKeys = this.getRelatedKeys(item, fieldId);
 
-        return related.reduce((obj, key) => {
-            obj[key] = item.associations[key];
-            return obj;
-        }, {});
+        return Promise.all<IArticle>(
+            associationKeys.map((key) => api.find('archive', item.associations[key]._id)),
+        )
+            .then((items: Array<IArticle>) => {
+                return items.reduce((obj, relatedItem, index) => {
+                    obj[associationKeys[index]] = relatedItem;
+                    return obj;
+                }, {});
+            });
     };
 }
