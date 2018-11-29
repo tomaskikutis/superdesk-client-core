@@ -22,10 +22,15 @@ export function RelatedItemsDirective(authoringWorkspace, relationsService) {
 
             scope.relatedItems = {};
 
-            relationsService.getRelatedItemsForField(scope.item, scope.field._id)
-                .then((res) => {
-                    scope.relatedItems = res;
-                });
+            scope.$watch('item.associations', () => {
+                scope.loading = true;
+
+                relationsService.getRelatedItemsForField(scope.item, scope.field._id)
+                    .then((res) => {
+                        scope.relatedItems = res;
+                        scope.loading = false;
+                    });
+            });
 
             const dragOverClass = 'dragover';
             const allowed = ((scope.field || {}).field_options || {}).allowed_types || {};
