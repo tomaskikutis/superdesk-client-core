@@ -1240,10 +1240,14 @@ declare module 'superdesk-api' {
         paths: {
             superdesk: any;
         };
-        language: string; // default client language
         editor3: {
             browserSpellCheck: boolean;
         };
+        pictures?: {
+            minWidth?: number;
+            minHeight?: number;
+        }
+        langOverride: {[langCode: string]: {[originalString: string]: string}};
     }
 
 
