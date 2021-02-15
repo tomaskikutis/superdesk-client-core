@@ -5,9 +5,11 @@ import {renderArea} from '../helpers';
 import {flatMap} from 'lodash';
 import {extensions} from 'appConfig';
 import {IDesk, IArticle, IListViewFieldWithOptions} from 'superdesk-api';
+import {IRelatedEntities} from 'core/getRelatedEntities';
 
 export interface IPropsItemListInfo {
     item: IArticle;
+    relatedEntities: IRelatedEntities;
     desk: IDesk;
     ingestProvider: any;
     profilesById: any;
@@ -22,7 +24,6 @@ export interface IPropsItemListInfo {
     toggleNested: (event) => void;
     singleLine: boolean;
     customRender: any;
-    viewType: any;
     options?: IListViewFieldWithOptions['options'];
 }
 
