@@ -101,7 +101,20 @@ declare module 'superdesk-api' {
         label: string;
         order: number; // Integer.
         icon: string;
-        component: React.ComponentType<{article: IArticle, contentProfile?: IContentProfileV2; fieldsData?: OrderedMap<string, unknown>}>;
+        component: React.ComponentType<{
+            article: IArticle;
+
+            // other props below are specific to authoring-react implementation
+
+            readOnly: boolean;
+            contentProfile?: IContentProfileV2;
+            fieldsData?: OrderedMap<string, unknown>;
+
+            /**
+             * Will prompt user to save changes. The promise will get rejected if user cancels saving.
+             */
+            handleUnsavedChanges(): Promise<IArticle>;
+        }>;
         isAllowed?(article: IArticle): boolean; // enables limiting widgets depending on article data
     }
 
@@ -1017,24 +1030,32 @@ declare module 'superdesk-api' {
         page: IGenericListPageComponent<T>;
         inEditMode: boolean;
         index: number;
+        getId(item: T): string;
     }
 
-    export interface IPropsGenericForm<T extends IItemWithId, P> {
+    export interface IPropsGenericForm<T, P> {
         getFormConfig(item?: Partial<T>): IFormGroup;
+        defaultSortOption: ISortOption;
         additionalSortOptions?: Array<{label: string; field: string;}>;
         additionalProps?: P; // allows passing props which will be available in container and item components
         defaultFilters?: Partial<T>;
         ItemComponent: React.ComponentType<IPropsGenericFormItemComponent<T> & {additionalProps?: P}>;
         ItemsContainerComponent?: React.ComponentType<IPropsGenericFormContainer<T> & {additionalProps?: P}>;
 
+        getId(item: T): string;
+
         // Allows initializing a new item with some fields already filled.
         getNewItemTemplate?(page: IGenericListPageComponent<T>): Partial<T>;
+
+        getNoItemsPlaceholder?(page: IGenericListPageComponent<T>): JSX.Element;
 
         refreshOnEvents?: Array<string>;
 
         fieldForSearch?: IFormField; // must be present in formConfig
         disallowCreatingNewItem?: true;
         disallowFiltering?: true;
+        disallowSorting?: true;
+        hideItemsCount?: true;
 
         /**
          * Dynamic schema is supported in order to display additional fields depending on values of current fields.
@@ -1042,6 +1063,8 @@ declare module 'superdesk-api' {
          * In some cases it is desirable to maintain a field even if it is not in the schema.
         */
         hiddenFields?: Array<string>;
+
+        labelForItemSaveButton?: string;
 
         // styles
         contentMargin?: number;
@@ -1088,8 +1111,12 @@ declare module 'superdesk-api' {
         form: Array<IFormField | IFormGroup>;
     }
 
-
-
+    export interface IPropsGenericArrayListPage<T, P> extends IPropsGenericForm<T, P> {
+        value: Array<T>;
+        onChange(value: Array<T>): void;
+        
+        newItemIndex?: number;
+    }
 
     // CRUD MANAGER
 
@@ -1100,11 +1127,7 @@ declare module 'superdesk-api' {
         direction: 'ascending' | 'descending';
     }
 
-    export interface IItemWithId {
-        _id: string;
-    }
-
-    export interface ICrudManagerResponse<T extends IItemWithId> {
+    export interface ICrudManagerData<T> {
         _items: Array<T>;
         _meta: {
             max_results: number;
@@ -1113,28 +1136,28 @@ declare module 'superdesk-api' {
         };
     }
 
-    export interface ICrudManagerState<Entity extends IItemWithId> extends ICrudManagerResponse<Entity> {
+    export interface ICrudManagerState<Entity> extends ICrudManagerData<Entity> {
         activeFilters: ICrudManagerFilters;
         activeSortOption?: ISortOption;
     }
 
-    export interface ICrudManagerMethods<Entity extends IItemWithId> {
+    export interface ICrudManagerMethods<Entity> {
         read(
             page: number,
             sort: ISortOption,
             filterValues?: ICrudManagerFilters,
-        ): Promise<ICrudManagerResponse<Entity>>;
+        ): Promise<ICrudManagerData<Entity>>;
         update(item: Entity): Promise<Entity>;
         create(item: Entity): Promise<Entity>;
         delete(item: Entity): Promise<void>;
-        refresh(): Promise<ICrudManagerResponse<Entity>>;
-        sort(nextSortOption: ISortOption): Promise<ICrudManagerResponse<Entity>>;
-        removeFilter(fieldName: string): Promise<ICrudManagerResponse<Entity>>;
-        goToPage(nextPage: number): Promise<ICrudManagerResponse<Entity>>;
+        refresh(): Promise<ICrudManagerData<Entity>>;
+        sort(nextSortOption: ISortOption): Promise<ICrudManagerData<Entity>>;
+        removeFilter(fieldName: string): Promise<ICrudManagerData<Entity>>;
+        goToPage(nextPage: number): Promise<ICrudManagerData<Entity>>;
     }
 
 
-    export interface ICrudManager<Entity extends IItemWithId> extends ICrudManagerState<Entity>, ICrudManagerMethods<Entity> {
+    export interface ICrudManager<Entity> extends ICrudManagerState<Entity>, ICrudManagerMethods<Entity> {
         // allow exposing it as one interface for consumer components
     }
 
@@ -1235,7 +1258,7 @@ declare module 'superdesk-api' {
         flex?: boolean;
     }
 
-    export interface IGenericListPageComponent<T extends IItemWithId> {
+    export interface IGenericListPageComponent<T> {
         openPreview(id: string): void;
         startEditing(id: string): void;
         closePreview(): void;
@@ -1308,6 +1331,13 @@ declare module 'superdesk-api' {
         justifyContent?: 'start' | 'end' | 'center' | 'space-around' | 'space-between' | 'space-evenly' | 'stretch';
         alignItems?: 'start' | 'end' | 'center' | 'stretch';
         noGrow?: boolean;
+
+        /**
+         * Will not wrap children in div elements.
+         * `noGrow` prop would then not be relevant.
+         */
+        noWrap?: boolean;
+
         children: Array<React.ReactNode>;
     }
 
@@ -1843,16 +1873,18 @@ declare module 'superdesk-api' {
             stringToNumber(value?: string, radix?: number): number | undefined;
             numberToString(value?: number): string | undefined;
             notNullOrUndefined<T>(x: null | undefined | T): x is T;
+            nameof<T>(name: keyof T): string;
         },
         components: {
             UserHtmlSingleLine: React.ComponentType<{html: string}>;
-            getGenericListPageComponent<T extends IBaseRestApiResponse, P>(
+            getGenericHttpEntityListPageComponent<T extends IBaseRestApiResponse, P>(
                 resource: string,
                 formConfig: IFormGroup,
                 defaultSortOption?: ISortOption,
                 additionalProps?: P,
             ): React.ComponentType<IPropsGenericForm<T, P>>;
-            connectCrudManager<Props, PropsToConnect, Entity extends IBaseRestApiResponse>(
+            getGenericArrayListPageComponent<T, P>(): React.ComponentType<IPropsGenericArrayListPage<T, P>>;
+            connectCrudManagerHttp<Props, PropsToConnect, Entity extends IBaseRestApiResponse>(
                 WrappedComponent: React.ComponentType<Props & PropsToConnect>,
                 name: string,
                 endpoint: string,
@@ -2354,8 +2386,9 @@ declare module 'superdesk-api' {
         config: IConfig;
     }
 
-    export interface IPreviewComponentProps {
-        value: any;
+    export interface IPreviewComponentProps<IValue> {
+        item: IArticle;
+        value: IValue;
     }
 
     // IConfig must be a plain object
@@ -2368,7 +2401,7 @@ declare module 'superdesk-api' {
         id: string;
         label: string;
         editorComponent: React.ComponentClass<IEditorComponentProps<IValue, IConfig, IUserPreferences>>;
-        previewComponent: React.ComponentType<IPreviewComponentProps>;
+        previewComponent: React.ComponentType<IPreviewComponentProps<IValue>>;
         configComponent?: React.ComponentType<IConfigComponentProps<IConfig>>;
         templateEditorComponent?: React.ComponentType<ITemplateEditorComponentProps<IValue, IConfig>>;
 

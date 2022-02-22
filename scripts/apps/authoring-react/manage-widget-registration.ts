@@ -6,12 +6,14 @@ import { getCommentsWidget } from './widgets/comments';
 import {IExtensionActivationResult} from 'superdesk-api';
 import {appConfig} from 'appConfig';
 import {getSuggestionsWidget} from './widgets/suggestions';
+import {getVersionsHistoryWidget} from './widgets/versions-history';
 
 const authoringReactWidgetsExtension = 'authoring-react-widgets';
 
 export function registerAuthoringReactWidgets() {
     const sidebarWidgets: IExtensionActivationResult['contributions']['authoringSideWidgets'] = [
         getFindAndReplaceWidget(),
+        getVersionsHistoryWidget(),
     ];
 
     // comments order: 3
