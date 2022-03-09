@@ -209,15 +209,12 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
       return;
     }
 
-    const userRegex = /\'@\[[a-zA-Z0-1-_\s]*\]\(user\:([a-zA-Z0-1-_]*)\)\'/gm;
-    const deskRegex = /\'@\[[a-zA-Z0-1-_\s]*\]\(desk\:([a-zA-Z0-1-_]*)\)\'/gm;
+    const userRegex = /\'@\[[a-zA-Z0-9-_\s]*\]\(user\:([a-zA-Z0-9-_]*)\)\'/gm;
+    const deskRegex = /\'@\[[a-zA-Z0-9-_\s]*\]\(desk\:([a-zA-Z0-9-_]*)\)\'/gm;
     let commentMessage = this.state.commentMessage;
 
-    console.log(commentMessage)
     commentMessage = commentMessage.replace(userRegex, "@$1");
-    console.log(commentMessage)
     commentMessage = commentMessage.replace(deskRegex, "#$1");
-    console.log(commentMessage)
 
     const comment = {
       item: this.state.itemId,
@@ -232,7 +229,6 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
       this.setState({ commentMessage: '' });
       this.reload();
     })
-
   }
 
   handleCommentInputKeyDown = (event) => {
