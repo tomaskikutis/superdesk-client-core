@@ -65,6 +65,7 @@ function getContentProfile(item: IArticle): Promise<IContentProfileV2> {
         }
 
         const profile: IContentProfileV2 = {
+            id: item.profile,
             name: 'test content profile',
             header: headerFields,
             content: contentFields,
@@ -183,7 +184,7 @@ export const authoringStorage: IAuthoringStorage = {
 
             // when object has changes, send entire object to avoid server dropping keys
             if (diff.extra != null) {
-                diff.fields_meta = _current.extra;
+                diff.extra = _current.extra;
             }
 
             const queryString = appConfig.features.publishFromPersonal === true

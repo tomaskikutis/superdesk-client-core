@@ -37,6 +37,7 @@ declare module 'superdesk-api' {
     export type IFieldsV2 = OrderedMap<string, IAuthoringFieldV2>;
 
     export interface IContentProfileV2 {
+        id: string;
         name: string;
         header: IFieldsV2;
         content: IFieldsV2;
@@ -1205,6 +1206,9 @@ declare module 'superdesk-api' {
     export interface IPropsWidgetHeading {
         widgetName: string;
         editMode: boolean;
+
+        // will only work for authoring-react
+        customContent?: JSX.Element;
     }
 
     export interface IGridComponentProps {
@@ -1337,6 +1341,8 @@ declare module 'superdesk-api' {
          * `noGrow` prop would then not be relevant.
          */
         noWrap?: boolean;
+
+        style?: React.CSSProperties;
 
         children: Array<React.ReactNode>;
     }
@@ -2386,9 +2392,16 @@ declare module 'superdesk-api' {
         config: IConfig;
     }
 
-    export interface IPreviewComponentProps<IValue> {
+    export interface IPreviewComponentProps<IValue, IConfig> {
         item: IArticle;
         value: IValue;
+        config: IConfig;
+    }
+
+    export interface IDifferenceComponentProps<IValue, IConfig> {
+        config: IConfig;
+        value1: IValue;
+        value2: IValue;
     }
 
     // IConfig must be a plain object
@@ -2404,6 +2417,8 @@ declare module 'superdesk-api' {
         previewComponent: React.ComponentType<IPreviewComponentProps<IValue>>;
         configComponent?: React.ComponentType<IConfigComponentProps<IConfig>>;
         templateEditorComponent?: React.ComponentType<ITemplateEditorComponentProps<IValue, IConfig>>;
+
+        differenceComponent?: React.ComponentType<IDifferenceComponentProps<IValue, IConfig>>;
 
         // may intercept template creation and return modified value
         onTemplateCreate?(value: any, config: IConfig): any;

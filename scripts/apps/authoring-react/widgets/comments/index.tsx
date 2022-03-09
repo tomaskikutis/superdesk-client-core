@@ -13,7 +13,7 @@ import { RelativeDate } from 'core/datetime/relativeDate';
 import { Spacer } from 'core/ui/components/Spacer';
 import { UserPopup } from 'core/ui/components';
 import { MentionsInput, Mention } from 'react-mentions';
-import mentionsStyle from './mention.Style';
+import mentionsStyle from './mention.style';
 
 
 const ENTER = 13;

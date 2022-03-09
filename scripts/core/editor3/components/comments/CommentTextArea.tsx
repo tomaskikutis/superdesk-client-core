@@ -119,7 +119,7 @@ class CommentTextArea extends React.Component<any, any> {
                     value={this.props.value}
                     onChange={this.props.onChange}
                     style={mentionsInputStyle}
-
+                    className="mentions-input"
                     markup="@[__display__](__type__:__id__)"
                     placeholder={this.props.placeholder || gettext('Type your comment...')}
                     onFocus={this.props.onFocus}
