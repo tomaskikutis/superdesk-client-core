@@ -1,8 +1,8 @@
 import React from 'react';
-import {gettext, gettextPlural} from 'core/utils';
-import {IArticle} from 'superdesk-api';
-import {TranslationsListWrapper} from '../translations-list-wrapper';
-import {showPopup} from 'core/ui/components/popup';
+import { gettext, gettextPlural } from 'core/utils';
+import { IArticle } from 'superdesk-api';
+import { TranslationsListWrapper } from '../translations-list-wrapper';
+import { showPopup } from 'core/ui/components/popupNew';
 
 interface IProps {
     item: IArticle;
@@ -20,7 +20,7 @@ export class Translations extends React.PureComponent<IProps> {
         showPopup(
             referenceElement,
             'bottom',
-            ({closePopup}) => (
+            ({ closePopup }) => (
                 <TranslationsListWrapper
                     ids={[this.props.item.translated_from]}
                     label={gettext('Original Article')}
@@ -34,7 +34,7 @@ export class Translations extends React.PureComponent<IProps> {
         showPopup(
             referenceElement,
             'bottom',
-            ({closePopup}) => (
+            ({ closePopup }) => (
                 <TranslationsListWrapper
                     ids={this.props.item.translations}
                     label={gettext('Translations')}
