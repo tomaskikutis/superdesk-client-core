@@ -2,7 +2,7 @@ import {registerInternalExtension} from 'core/helpers/register-internal-extensio
 // import {getDemoWidget} from './widgets/demo-widget';
 import {getFindAndReplaceWidget} from './widgets/find-and-replace';
 import {getInlineCommentsWidget} from './widgets/inline-comments';
-import { getCommentsWidget } from './widgets/comments';
+import {getCommentsWidget} from './widgets/comments';
 import {IExtensionActivationResult} from 'superdesk-api';
 import {appConfig} from 'appConfig';
 import {getSuggestionsWidget} from './widgets/suggestions';
@@ -18,7 +18,7 @@ export function registerAuthoringReactWidgets() {
 
     // comments order: 3
     sidebarWidgets.push(getCommentsWidget());
-    
+
     if ((appConfig.features.editorInlineComments ?? true) === true) {
         sidebarWidgets.push(getInlineCommentsWidget());
     }
@@ -26,8 +26,6 @@ export function registerAuthoringReactWidgets() {
     if ((appConfig.features.editorSuggestions ?? true) === true) {
         sidebarWidgets.push(getSuggestionsWidget());
     }
-
-    
 
     registerInternalExtension(authoringReactWidgetsExtension, {
         contributions: {

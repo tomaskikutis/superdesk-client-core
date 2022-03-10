@@ -19,18 +19,18 @@ export default ({
         },
 
         input: {
-           padding: '3px',
-           paddingTop: '4px',
-           overflow: 'hidden',
-           outline: 0,
-           border: 0,
+            padding: '3px',
+            paddingTop: '4px',
+            overflow: 'hidden',
+            outline: 0,
+            border: 0,
         },
 
         suggestions: {
             top: 'auto',
-            bottom: "2em",
+            bottom: '2em',
             minWidth: '100px',
-            
+
             list: {
                 backgroundColor: 'white',
                 border: '1px solid rgba(0,0,0,0.15)',

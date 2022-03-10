@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { throttle, once } from 'lodash';
-import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core/';
+import {throttle, once} from 'lodash';
+import {createPopper, Instance as PopperInstance, Placement} from '@popperjs/core/';
 import maxSize from 'popper-max-size-modifier';
-import { applyMaxSize } from './AutoCompleteSuggestions';
+import {applyMaxSize} from './AutoCompleteSuggestions';
 
 interface IPropsPositioner {
     referenceElement: HTMLElement;
@@ -76,7 +76,7 @@ class PopupPositioner extends React.PureComponent<IPropsPositioner> {
                 ref={(el) => {
                     this.wrapperEl = el;
                 }}
-                style={{ zIndex: this.props.zIndex ?? 1 }}
+                style={{zIndex: this.props.zIndex ?? 1}}
             >
                 {this.props.children}
             </div>

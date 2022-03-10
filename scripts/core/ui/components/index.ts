@@ -57,5 +57,5 @@ export {
     NavTabs,
     DropZone,
     PlainTextEditor,
-    UserPopup
+    UserPopup,
 };
