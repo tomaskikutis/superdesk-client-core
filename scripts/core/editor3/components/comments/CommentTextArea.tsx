@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Mention, MentionsInput} from 'react-mentions';
-import {UserAvatar} from 'apps/users/components/UserAvatar';
+import { Mention, MentionsInput } from 'react-mentions';
+import { UserAvatar } from 'apps/users/components/UserAvatar';
 import mentionsStyle from './mentionsStyle';
 import ng from 'core/services/ng';
-import {gettext} from 'core/utils';
-import {IUser} from 'superdesk-api';
+import { gettext } from 'core/utils';
+import { IUser } from 'superdesk-api';
 
 interface IUserSuggestion {
     type: 'user';
@@ -51,7 +51,7 @@ class CommentTextArea extends React.Component<any, any> {
         this.desks.initialize().then(() =>
             cb(
                 this.desks.desks._items
-                    .filter(({name}) => name.toLowerCase().indexOf(q.toLowerCase()) > -1)
+                    .filter(({ name }) => name.toLowerCase().indexOf(q.toLowerCase()) > -1)
                     .map((d) => ({
                         id: d._id,
                         display: d.name,
@@ -103,8 +103,7 @@ class CommentTextArea extends React.Component<any, any> {
     render() {
         const mentionsInputStyle = typeof this.props.maxHeight !== 'number'
             ? mentionsStyle.input
-            : {
-                ...mentionsStyle.input, '&multiLine': {
+            : {...mentionsStyle.input, '&multiLine': {
                     ...mentionsStyle.input['&multiLine'],
                     input: {
                         ...mentionsStyle.input['&multiLine'].input,
