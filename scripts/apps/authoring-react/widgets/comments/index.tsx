@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
-import { IAuthoringSideWidget } from 'superdesk-api';
-import { gettext } from 'core/utils';
+import {IAuthoringSideWidget} from 'superdesk-api';
+import {gettext} from 'core/utils';
 import CommentsWidget from './CommentsWidget';
 // Can't call `gettext` in the top level
 const getLabel = () => gettext('Comments');

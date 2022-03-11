@@ -1,9 +1,9 @@
 import React from 'react';
-import { IExtensionActivationResult, IUser, IArticle } from 'superdesk-api';
-import { httpRequestJsonLocal } from 'core/helpers/network';
-import { gettext } from 'core/utils';
-import { AuthoringWidgetHeading } from 'apps/dashboard/widget-heading';
-import { AuthoringWidgetLayout } from 'apps/dashboard/widget-layout';
+import {IExtensionActivationResult, IUser, IArticle} from 'superdesk-api';
+import {httpRequestJsonLocal} from 'core/helpers/network';
+import {gettext} from 'core/utils';
+import {AuthoringWidgetHeading} from 'apps/dashboard/widget-heading';
+import {AuthoringWidgetLayout} from 'apps/dashboard/widget-layout';
 import {
     Button,
     EmptyState,
@@ -11,12 +11,12 @@ import {
     ButtonGroup,
     BoxedList,
 } from 'superdesk-ui-framework/react';
-import { store } from 'core/data';
-import { UserAvatar } from 'apps/users/components/UserAvatar';
-import { Spacer } from 'core/ui/components/Spacer';
-import { MentionsInput, Mention } from 'react-mentions';
+import {store} from 'core/data';
+import {UserAvatar} from 'apps/users/components/UserAvatar';
+import {Spacer} from 'core/ui/components/Spacer';
+import {MentionsInput, Mention} from 'react-mentions';
 import mentionsStyle from './mention.style';
-import { Comment, TComment } from "./Comment";
+import {Comment, TComment} from './Comment';
 
 // Can't call `gettext` in the top level
 const getLabel = () => gettext('Comments');
@@ -73,11 +73,11 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
             }).then((response: any) => {
                 const desks = response._items.map(
                     (desk) => {
-                        return { id: desk.name.replace(/\s/gm, '_'), display: desk.name, type: 'desk' };
+                        return {id: desk.name.replace(/\s/gm, '_'), display: desk.name, type: 'desk'};
                     },
                 );
 
-                resolve({ desks: desks });
+                resolve({desks: desks});
             });
         });
     }
@@ -89,10 +89,10 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
 
             for (const key in users) {
                 mentionInputDataUsers.push(
-                    { id: users[key].username, display: users[key].display_name, type: 'user', user: users[key] },
+                    {id: users[key].username, display: users[key].display_name, type: 'user', user: users[key]},
                 );
             }
-            resolve({ users: users, mentionInputDataUsers: mentionInputDataUsers });
+            resolve({users: users, mentionInputDataUsers: mentionInputDataUsers});
         });
     }
 
@@ -102,7 +102,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                 where: {
                     item: this.state.itemId,
                 },
-                embedded: { user: 1 },
+                embedded: {user: 1},
             };
 
             httpRequestJsonLocal({
@@ -110,7 +110,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                 path: '/item_comments',
                 urlParams: criteria,
             }).then((response: any) => {
-                this.setState({ comments: response?._items || null });
+                this.setState({comments: response?._items || null});
             });
         }
     }
@@ -137,7 +137,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
             path: '/item_comments',
             payload: comment,
         }).then((response: any) => {
-            this.setState({ commentMessage: '' });
+            this.setState({commentMessage: ''});
             this.reload();
         });
     }
@@ -156,7 +156,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                     ? <i className="icon-tasks" />
                     : <UserAvatar user={item.user} size="small" />
                 }
-                <span style={{ marginLeft: '1em' }}>{highlightedDisplay}</span>
+                <span style={{marginLeft: '1em'}}>{highlightedDisplay}</span>
             </>
         );
     }
@@ -186,7 +186,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                 <MentionsInput
                     value={this.state.commentMessage}
                     onChange={(ev, newValue) => {
-                        this.setState({ commentMessage: newValue });
+                        this.setState({commentMessage: newValue});
                     }}
                     style={mentionsStyle.input}
                     markup="'@[__display__](__type__:__id__)'"
@@ -215,16 +215,16 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                 <Spacer h gap="4" justifyContent="stretch">
                     <Checkbox
                         checked={this.state.saveOnEnter}
-                        label={{ text: 'post on "Enter"' }}
+                        label={{text: 'post on "Enter"'}}
                         onChange={(value) => {
-                            this.setState({ saveOnEnter: value });
+                            this.setState({saveOnEnter: value});
                         }}
                     />
                     <ButtonGroup align="end">
                         <Button
                             text="cancel"
                             onClick={() => {
-                                this.setState({ commentMessage: '' });
+                                this.setState({commentMessage: ''});
                             }}
                         />
                         <Button

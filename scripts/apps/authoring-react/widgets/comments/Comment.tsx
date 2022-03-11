@@ -21,7 +21,7 @@ export type TComment = {
 
 export class Comment extends React.PureComponent<{ comment: TComment, users: { [key: string]: IUser } }> {
     getMessageText = () => {
-        const { comment } = this.props;
+        const {comment} = this.props;
 
         let commentText = comment.text;
 
@@ -85,8 +85,9 @@ export class Comment extends React.PureComponent<{ comment: TComment, users: { [
                     } else {
                         result.push(
                             (<span
-                                style={{ color: "#3d8fb1" }}
-                                key={'mentionDesk' + indexFrom}>
+                                style={{color: '#3d8fb1'}}
+                                key={'mentionDesk' + indexFrom}
+                            >
                                 {mentionText}
                             </span>),
                         );
@@ -105,7 +106,7 @@ export class Comment extends React.PureComponent<{ comment: TComment, users: { [
     }
 
     render() {
-        const { comment } = this.props;
+        const {comment} = this.props;
 
         return (
             <BoxedListItem
