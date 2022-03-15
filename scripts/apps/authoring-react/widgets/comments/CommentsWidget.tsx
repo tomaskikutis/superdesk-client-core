@@ -27,7 +27,7 @@ type IProps = React.ComponentProps<
 interface IState {
     itemId: IArticle['_id'] | null;
     comments: Array<TComment> | null;
-    commentMessage: string;
+    newCommentMessage: string;
     saveOnEnter: boolean;
     users: { [key: string]: IUser };
     mentionInputDataUsers: Array<{ id: string, display: string }>;
@@ -41,7 +41,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
         this.state = {
             itemId: props.article?._id || null,
             comments: null,
-            commentMessage: '',
+            newCommentMessage: '',
             saveOnEnter: false,
             users: {},
             mentionInputDataUsers: [],
@@ -50,17 +50,13 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
     }
 
     componentDidMount(): void {
-        this.reload();
-        this.loadData();
-    }
-
-    loadData = () => {
-        Promise.all([this.loadDesks(), this.loadUsers()])
+        Promise.all([this.loadDesks(), this.loadUsers(), this.loadComments()])
             .then((values: any) => {
                 this.setState({
                     mentionInputDataDesks: values[0].desks,
                     users: values[1].users,
                     mentionInputDataUsers: values[1].mentionInputDataUsers,
+                    comments: values[2].comments,
                 });
             });
     }
@@ -96,40 +92,51 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
         });
     }
 
-    reload = () => {
-        if (this.state.itemId) {
-            const criteria = {
-                where: {
-                    item: this.state.itemId,
-                },
-                embedded: {user: 1},
-            };
+    loadComments = () => {
+        return new Promise((resolve) => {
+            if (this.state.itemId) {
+                const criteria = {
+                    where: {
+                        item: this.state.itemId,
+                    },
+                    embedded: {user: 1},
+                };
 
-            httpRequestJsonLocal({
-                method: 'GET',
-                path: '/item_comments',
-                urlParams: criteria,
-            }).then((response: any) => {
-                this.setState({comments: response?._items || null});
+                httpRequestJsonLocal({
+                    method: 'GET',
+                    path: '/item_comments',
+                    urlParams: criteria,
+                }).then((response: any) => {
+                    resolve({comments: response?._items || null});
+                });
+            } else {
+                resolve({comments: null});
+            }
+        });
+    }
+
+    reload = () => {
+        this.loadComments()
+            .then((result: { comments: Array<TComment> | null }) => {
+                this.setState({comments: result.comments});
             });
-        }
     }
 
     save = () => {
-        if (!this.state.commentMessage.length) {
+        if (!this.state.newCommentMessage.length) {
             return;
         }
 
         const userRegex = /'@\[[^\]\[]*\]\(user\:([^\)\(]*)\)\'/gm;
         const deskRegex = /'@\[[^\]\[]*\]\(desk\:([^\)\(]*)\)\'/gm;
-        let commentMessage = this.state.commentMessage;
+        let newCommentMessage = this.state.newCommentMessage;
 
-        commentMessage = commentMessage.replace(userRegex, '@$1');
-        commentMessage = commentMessage.replace(deskRegex, '#$1');
+        newCommentMessage = newCommentMessage.replace(userRegex, '@$1');
+        newCommentMessage = newCommentMessage.replace(deskRegex, '#$1');
 
         const comment = {
             item: this.state.itemId,
-            text: commentMessage,
+            text: newCommentMessage,
         };
 
         httpRequestJsonLocal({
@@ -137,7 +144,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
             path: '/item_comments',
             payload: comment,
         }).then((response: any) => {
-            this.setState({commentMessage: ''});
+            this.setState({newCommentMessage: ''});
             this.reload();
         });
     }
@@ -162,7 +169,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
     }
 
     render() {
-        const hasComments = !!this.state.comments?.length;
+        const hasComments = this.state.comments?.length > 0;
 
         const widgetBody: JSX.Element = hasComments
             ? (
@@ -184,9 +191,9 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
         const widgetFooter: JSX.Element = this.state.itemId ? (
             <Spacer v gap="8" >
                 <MentionsInput
-                    value={this.state.commentMessage}
+                    value={this.state.newCommentMessage}
                     onChange={(ev, newValue) => {
-                        this.setState({commentMessage: newValue});
+                        this.setState({newCommentMessage: newValue});
                     }}
                     style={mentionsStyle.input}
                     markup="'@[__display__](__type__:__id__)'"
@@ -224,14 +231,14 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                         <Button
                             text="cancel"
                             onClick={() => {
-                                this.setState({commentMessage: ''});
+                                this.setState({newCommentMessage: ''});
                             }}
                         />
                         <Button
                             text="post"
                             type="primary"
                             onClick={this.save}
-                            disabled={!this.state.commentMessage.length}
+                            disabled={!this.state.newCommentMessage.length}
                         />
                     </ButtonGroup>
                 </Spacer>

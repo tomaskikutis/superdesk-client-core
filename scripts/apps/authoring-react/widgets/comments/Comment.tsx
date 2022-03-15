@@ -84,12 +84,14 @@ export class Comment extends React.PureComponent<{ comment: TComment, users: { [
                         );
                     } else {
                         result.push(
-                            (<span
-                                style={{color: '#3d8fb1'}}
-                                key={'mentionDesk' + indexFrom}
-                            >
-                                {mentionText}
-                            </span>),
+                            (
+                                <span
+                                    style={{color: '#3d8fb1'}}
+                                    key={'mentionDesk' + indexFrom}
+                                >
+                                    {mentionText}
+                                </span>
+                            ),
                         );
                     }
 
@@ -117,7 +119,7 @@ export class Comment extends React.PureComponent<{ comment: TComment, users: { [
                 <BoxedListContentRow>
                     <RelativeDate datetime={comment._updated ? comment._updated : comment._created} />
                 </BoxedListContentRow>
-                {!!comment.user && (
+                {comment.user?.display_name?.length > 0 && (
                     <BoxedListContentRow>
                         <h4 className="sd-heading sd-text--sans sd-heading--h4">{comment.user.display_name}</h4>
                     </BoxedListContentRow>

@@ -10,18 +10,22 @@ interface IPropsPositioner {
     placement: Placement;
     zIndex?: number;
     onClose(): void;
+    autoClose?: boolean;
 }
 
 class PopupPositioner extends React.PureComponent<IPropsPositioner> {
     private wrapperEl: HTMLDivElement;
     private positionOnce: (el: HTMLElement) => void;
     private popper: PopperInstance;
+    private timer: ReturnType<typeof setTimeout>;
 
     constructor(props: IPropsPositioner) {
         super(props);
 
         this.closeOnClick = this.closeOnClick.bind(this);
         this.closeOnScroll = throttle(this.closeOnScroll.bind(this), 200);
+        this.clearTimer = this.clearTimer.bind(this);
+        this.setTimer = this.setTimer.bind(this);
     }
 
     closeOnClick(event: MouseEvent) {
@@ -47,9 +51,24 @@ class PopupPositioner extends React.PureComponent<IPropsPositioner> {
         }
     }
 
+    clearTimer() {
+        clearTimeout(this.timer);
+    }
+
+    setTimer() {
+        this.timer = setTimeout(this.props.onClose, 100);
+    }
+
     componentDidMount() {
         window.addEventListener('click', this.closeOnClick);
         window.addEventListener('scroll', this.closeOnScroll, true);
+
+        if (this.props.autoClose && this.wrapperEl != null) {
+            this.props.referenceElement.addEventListener('mouseenter', this.clearTimer);
+            this.wrapperEl.addEventListener('mouseenter', this.clearTimer);
+            this.props.referenceElement.addEventListener('mouseleave', this.setTimer);
+            this.wrapperEl.addEventListener('mouseleave', this.setTimer);
+        }
 
         if (this.wrapperEl != null) {
             this.popper = createPopper(
@@ -66,6 +85,11 @@ class PopupPositioner extends React.PureComponent<IPropsPositioner> {
     componentWillUnmount() {
         window.removeEventListener('click', this.closeOnClick);
         window.removeEventListener('scroll', this.closeOnScroll, true);
+
+        this.props.referenceElement.removeEventListener('mouseenter', this.clearTimer);
+        this.wrapperEl.removeEventListener('mouseenter', this.clearTimer);
+        this.props.referenceElement.removeEventListener('mouseleave', this.setTimer);
+        this.wrapperEl.removeEventListener('mouseleave', this.setTimer);
 
         this.popper.destroy?.();
     }
@@ -92,6 +116,7 @@ export function showPopup(
     placement: Placement,
     Component: React.ComponentType<{ closePopup(): void }>,
     zIndex?: number,
+    autoClose?: boolean,
 ) {
     const el = document.createElement('div');
 
@@ -109,6 +134,7 @@ export function showPopup(
                 placement={placement}
                 onClose={onClose}
                 zIndex={zIndex}
+                autoClose={autoClose || false}
             >
                 <Component
                     closePopup={onClose}
