@@ -86,10 +86,12 @@ class PopupPositioner extends React.PureComponent<IPropsPositioner> {
         window.removeEventListener('click', this.closeOnClick);
         window.removeEventListener('scroll', this.closeOnScroll, true);
 
-        this.props.referenceElement.removeEventListener('mouseenter', this.clearTimer);
-        this.wrapperEl.removeEventListener('mouseenter', this.clearTimer);
-        this.props.referenceElement.removeEventListener('mouseleave', this.setTimer);
-        this.wrapperEl.removeEventListener('mouseleave', this.setTimer);
+        if (this.props.autoClose) {
+            this.props.referenceElement.removeEventListener('mouseenter', this.clearTimer);
+            this.wrapperEl.removeEventListener('mouseenter', this.clearTimer);
+            this.props.referenceElement.removeEventListener('mouseleave', this.setTimer);
+            this.wrapperEl.removeEventListener('mouseleave', this.setTimer);
+        }
 
         this.popper.destroy?.();
     }
