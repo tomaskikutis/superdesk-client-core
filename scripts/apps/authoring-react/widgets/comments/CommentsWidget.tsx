@@ -16,7 +16,7 @@ import {UserAvatar} from 'apps/users/components/UserAvatar';
 import {Spacer} from 'core/ui/components/Spacer';
 import {MentionsInput, Mention} from 'react-mentions';
 import mentionsStyle from './mention.style';
-import {Comment, TComment} from './Comment';
+import {Comment, IComment} from './Comment';
 
 // Can't call `gettext` in the top level
 const getLabel = () => gettext('Comments');
@@ -26,7 +26,7 @@ type IProps = React.ComponentProps<
 >;
 interface IState {
     itemId: IArticle['_id'] | null;
-    comments: Array<TComment> | null;
+    comments: Array<IComment> | null;
     newCommentMessage: string;
     saveOnEnter: boolean;
     users: { [key: string]: IUser };
@@ -117,7 +117,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
 
     reload = () => {
         this.loadComments()
-            .then((result: { comments: Array<TComment> | null }) => {
+            .then((result: { comments: Array<IComment> | null }) => {
                 this.setState({comments: result.comments});
             });
     }

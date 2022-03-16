@@ -8,7 +8,7 @@ import {RelativeDate} from 'core/datetime/relativeDate';
 import {UserPopup} from 'core/ui/components';
 import {UserAvatar} from 'apps/users/components/UserAvatar';
 
-export type TComment = {
+export type IComment = {
     _id: string;
     text: string;
     item: string;
@@ -19,7 +19,7 @@ export type TComment = {
     _created: string;
 };
 
-export class Comment extends React.PureComponent<{ comment: TComment, users: { [key: string]: IUser } }> {
+export class Comment extends React.PureComponent<{ comment: IComment, users: { [key: string]: IUser } }> {
     getMessageText = () => {
         const {comment} = this.props;
 
