@@ -222,7 +222,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                     />
                 </MentionsInput>
 
-                <Spacer h gap="4" justifyContent="stretch">
+                <Spacer h gap="4" justifyContent="space-between" noGrow>
                     <Checkbox
                         checked={this.state.saveOnEnter}
                         label={{text: 'post on "Enter"'}}
@@ -230,20 +230,13 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                             this.setState({saveOnEnter: value});
                         }}
                     />
-                    <ButtonGroup align="end">
-                        <Button
-                            text="cancel"
-                            onClick={() => {
-                                this.setState({newCommentMessage: ''});
-                            }}
-                        />
-                        <Button
-                            text="post"
-                            type="primary"
-                            onClick={this.save}
-                            disabled={!this.state.newCommentMessage.length}
-                        />
-                    </ButtonGroup>
+
+                    <Button
+                        text="post"
+                        type="primary"
+                        onClick={this.save}
+                        disabled={this.state.newCommentMessage.length < 1}
+                    />
                 </Spacer>
             </Spacer>
         ) : null;
