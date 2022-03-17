@@ -109,8 +109,7 @@ class CommentTextArea extends React.Component<any, any> {
                     ...mentionsStyle.input['&multiLine'].input,
                     maxHeight: this.props.maxHeight,
                 },
-            },
-            };
+            }};
 
         return (
             <div className="comment-textarea">
