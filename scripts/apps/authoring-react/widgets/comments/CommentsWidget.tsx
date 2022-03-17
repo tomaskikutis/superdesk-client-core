@@ -1,5 +1,7 @@
+/* eslint-disable react/no-multi-comp */
+
 import React from 'react';
-import {IExtensionActivationResult, IUser, IArticle} from 'superdesk-api';
+import {IExtensionActivationResult, IUser, IArticle, IDesk, IRestApiResponse} from 'superdesk-api';
 import {httpRequestJsonLocal} from 'core/helpers/network';
 import {gettext} from 'core/utils';
 import {AuthoringWidgetHeading} from 'apps/dashboard/widget-heading';
@@ -16,14 +18,14 @@ import {UserAvatar} from 'apps/users/components/UserAvatar';
 import {Spacer} from 'core/ui/components/Spacer';
 import {MentionsInput, Mention} from 'react-mentions';
 import mentionsStyle from './mention.style';
-import {Comment, IComment} from './Comment';
+import {Comment} from './Comment';
+import {IComment, IDeskSuggestion, IUserSuggestion, IUserSuggestionData} from './interfaces';
 
 // Can't call `gettext` in the top level
 const getLabel = () => gettext('Comments');
 
-type IProps = React.ComponentProps<
-    IExtensionActivationResult['contributions']['authoringSideWidgets'][0]['component']
->;
+type IProps = React.ComponentProps<IExtensionActivationResult['contributions']['authoringSideWidgets'][0]['component']>;
+
 interface IState {
     itemId: IArticle['_id'] | null;
     comments: Array<IComment> | null;
@@ -32,6 +34,18 @@ interface IState {
     users: { [key: string]: IUser };
     mentionInputDataUsers: Array<{ id: string, display: string }>;
     mentionInputDataDesks: Array<{ id: string, display: string }>;
+}
+
+function renderSuggestion(item: IDeskSuggestion | IUserSuggestion, search, highlightedDisplay) {
+    return (
+        <React.Fragment>
+            {item.type === 'desk'
+                ? <i className="icon-tasks" />
+                : <UserAvatar user={item.user} size="small" />
+            }
+            <span style={{marginLeft: '1em'}}>{highlightedDisplay}</span>
+        </React.Fragment>
+    );
 }
 
 class CommentsWidget extends React.PureComponent<IProps, IState> {
@@ -49,80 +63,81 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
         };
     }
 
-    componentDidMount(): void {
-        Promise.all([this.loadDesks(), this.loadUsers(), this.loadComments()])
-            .then((values: any) => {
+    componentDidMount() {
+        Promise.all([
+            this.loadDeskSuggestions(),
+            this.loadUsers(),
+            this.loadComments(),
+        ])
+            .then(([deskSuggestions, userSuggestionsData, comments]) => {
                 this.setState({
-                    mentionInputDataDesks: values[0].desks,
-                    users: values[1].users,
-                    mentionInputDataUsers: values[1].mentionInputDataUsers,
-                    comments: values[2].comments,
+                    mentionInputDataDesks: deskSuggestions,
+                    users: userSuggestionsData.users,
+                    mentionInputDataUsers: userSuggestionsData.mentionInputDataUsers,
+                    comments: comments,
                 });
             });
     }
 
-    loadDesks = () => {
+    loadDeskSuggestions = (): Promise<Array<IDeskSuggestion>> => {
         return new Promise((resolve) => {
-            httpRequestJsonLocal({
+            httpRequestJsonLocal<IRestApiResponse<IDesk>>({
                 method: 'GET',
                 path: '/desks',
-            }).then((response: any) => {
-                const desks = response._items.map(
+            }).then((response) => {
+                const deskSuggestions: Array<IDeskSuggestion> = response._items.map(
                     (desk) => {
                         return {id: desk.name.replace(/\s/gm, '_'), display: desk.name, type: 'desk'};
                     },
                 );
 
-                resolve({desks: desks});
+                resolve(deskSuggestions);
             });
         });
     }
 
-    loadUsers = () => {
+    loadUsers = (): Promise<IUserSuggestionData> => {
         return new Promise((resolve) => {
             const users = store.getState().users.entities;
-            const mentionInputDataUsers = [];
+            const mentionInputDataUsers: Array<IUserSuggestion> = [];
 
             for (const key in users) {
                 mentionInputDataUsers.push(
                     {id: users[key].username, display: users[key].display_name, type: 'user', user: users[key]},
                 );
             }
+
             resolve({users: users, mentionInputDataUsers: mentionInputDataUsers});
         });
     }
 
-    loadComments = () => {
-        return new Promise((resolve) => {
-            if (this.state.itemId) {
-                const criteria = {
-                    where: {
-                        item: this.state.itemId,
-                    },
-                    embedded: {user: 1},
-                };
+    loadComments = (): Promise<Array<IComment>> => {
+        if (this.state.itemId == null) {
+            return Promise.resolve([]);
+        }
 
-                httpRequestJsonLocal({
-                    method: 'GET',
-                    path: '/item_comments',
-                    urlParams: criteria,
-                }).then((response: any) => {
-                    resolve({comments: response?._items || null});
-                });
-            } else {
-                resolve({comments: null});
-            }
-        });
+        const criteria = {
+            where: {
+                item: this.state.itemId,
+            },
+            embedded: {user: 1},
+        };
+
+        return httpRequestJsonLocal<IRestApiResponse<IComment>>({
+            method: 'GET',
+            path: '/item_comments',
+            urlParams: criteria,
+        }).then(({_items}) => _items);
     }
 
-    reload = () => {
+    reload = (): void => {
         this.loadComments()
-            .then((result: { comments: Array<IComment> | null }) => {
-                this.setState({comments: result.comments});
+            .then((comments) => {
+                this.setState({comments});
             });
     }
 
-    save = () => {
+    save = (): void => {
         if (!this.state.newCommentMessage.length) {
             return;
         }
@@ -143,29 +158,17 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
             method: 'POST',
             path: '/item_comments',
             payload: comment,
-        }).then((response: any) => {
+        }).then(() => {
             this.setState({newCommentMessage: ''});
             this.reload();
         });
     }
 
-    handleCommentInputKeyDown = (event) => {
+    handleCommentInputKeyDown = (event): void => {
         if (!this.state.saveOnEnter || event.key !== 'Enter' || event.shiftKey) {
             return;
         }
         this.save();
-    }
-
-    renderSuggestion = (item, search, highlightedDisplay) => {
-        return (
-            <>
-                {item.type === 'desk'
-                    ? <i className="icon-tasks" />
-                    : <UserAvatar user={item.user} size="small" />
-                }
-                <span style={{marginLeft: '1em'}}>{highlightedDisplay}</span>
-            </>
-        );
     }
 
     render() {
@@ -206,7 +209,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                         type="user"
                         style={mentionsStyle.mention}
                         appendSpaceOnAdd
-                        renderSuggestion={this.renderSuggestion}
+                        renderSuggestion={renderSuggestion}
                     />
 
                     <Mention
@@ -215,7 +218,7 @@ class CommentsWidget extends React.PureComponent<IProps, IState> {
                         type="desk"
                         style={mentionsStyle.mention}
                         appendSpaceOnAdd
-                        renderSuggestion={this.renderSuggestion}
+                        renderSuggestion={renderSuggestion}
                     />
                 </MentionsInput>
 

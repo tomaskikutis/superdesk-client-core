@@ -7,17 +7,7 @@ import {IUser} from 'superdesk-api';
 import {RelativeDate} from 'core/datetime/relativeDate';
 import {UserPopup} from 'core/ui/components';
 import {UserAvatar} from 'apps/users/components/UserAvatar';
-
-export type IComment = {
-    _id: string;
-    text: string;
-    item: string;
-    user?: IUser;
-    mentioned_users?: any;
-    mentioned_desks?: any;
-    _updated?: string;
-    _created: string;
-};
+import {IComment} from './interfaces';
 
 export class Comment extends React.PureComponent<{ comment: IComment, users: { [key: string]: IUser } }> {
     getMessageText = () => {
