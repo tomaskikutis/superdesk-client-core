@@ -4,7 +4,7 @@ import {
     BoxedListContentRow,
 } from 'superdesk-ui-framework/react';
 import {IUser} from 'superdesk-api';
-import {RelativeDate} from 'core/datetime/relativeDate';
+import {TimeElem} from 'apps/search/components';
 import {UserPopup} from 'core/ui/components';
 import {UserAvatar} from 'apps/users/components/UserAvatar';
 import {IComment} from './interfaces';
@@ -106,14 +106,16 @@ export class Comment extends React.PureComponent<{ comment: IComment, users: { [
                     <UserAvatar user={comment.user} />
                 ) : null}
             >
-                <BoxedListContentRow>
-                    <RelativeDate datetime={comment._updated ? comment._updated : comment._created} />
-                </BoxedListContentRow>
                 {comment.user?.display_name?.length > 0 && (
                     <BoxedListContentRow>
                         <h4 className="sd-heading sd-text--sans sd-heading--h4">{comment.user.display_name}</h4>
                     </BoxedListContentRow>
                 )}
+
+                <BoxedListContentRow>
+                    <TimeElem date={comment._updated ? comment._updated : comment._created} />
+                </BoxedListContentRow>
+
                 <BoxedListContentRow>
                     <p>{this.getMessageText()}</p>
                 </BoxedListContentRow>
