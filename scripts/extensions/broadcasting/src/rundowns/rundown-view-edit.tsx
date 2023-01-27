@@ -28,6 +28,7 @@ interface IState {
     rundown: IRundown | null;
     rundownWithChanges: IRundown | null;
     exportOptions: Array<IRundownExportOption>;
+    rundownsListHidden: boolean;
 }
 
 import {superdesk} from '../superdesk';
@@ -140,6 +141,7 @@ export class RundownViewEditComponent extends React.PureComponent<IProps, IState
             rundown: null,
             rundownWithChanges: null,
             exportOptions: [],
+            rundownsListHidden: false,
         };
 
         this.setRundownField = this.setRundownField.bind(this);
@@ -465,82 +467,86 @@ export class RundownViewEditComponent extends React.PureComponent<IProps, IState
                             </SubNav>
                         </Layout.HeaderPanel>
 
-                        <Layout.MainPanel padding="none">
-                            <Layout.AuthoringMain
-                                headerPadding="medium"
-                                authoringHeader={(
-                                    <AiringInfoBlock
-                                        value={rundown}
-                                        onChange={this.setRundownField}
-                                        readOnly={editingDisallowed}
-                                        validationErrors={validationErrors}
-                                    />
-                                )}
-                                headerCollapsed={true}
-                            >
-                                <div>
-                                    <Input
-                                        type="text"
-                                        value={rundown.title}
-                                        onChange={(val) => {
-                                            this.setRundownField({title: val});
-                                        }}
-                                        label={gettext('Headline')}
-                                        disabled={editingDisallowed}
-                                        labelHidden
-                                        inlineLabel
-                                        size="large"
-                                        boxedStyle
-                                        error={validationErrors.title ?? undefined}
-                                        invalid={validationErrors.title != null}
-                                    />
-
-                                    <SpacerBlock v gap="16" />
-
-                                    <WithLiveResources
-                                        resources={[
-                                            {
-                                                resource: 'rundown_items',
-                                                ids: rundown.items.map(({_id: id}) => id),
-                                            },
-                                        ]}
+                        {
+                            this.state.rundownsListHidden !== true && (
+                                <Layout.MainPanel padding="none">
+                                    <Layout.AuthoringMain
+                                        headerPadding="medium"
+                                        authoringHeader={(
+                                            <AiringInfoBlock
+                                                value={rundown}
+                                                onChange={this.setRundownField}
+                                                readOnly={editingDisallowed}
+                                                validationErrors={validationErrors}
+                                            />
+                                        )}
+                                        headerCollapsed={true}
                                     >
-                                        {(res) => {
-                                            const rundownItems: Array<IRundownItem> = res[0]._items;
+                                        <div>
+                                            <Input
+                                                type="text"
+                                                value={rundown.title}
+                                                onChange={(val) => {
+                                                    this.setRundownField({title: val});
+                                                }}
+                                                label={gettext('Headline')}
+                                                disabled={editingDisallowed}
+                                                labelHidden
+                                                inlineLabel
+                                                size="large"
+                                                boxedStyle
+                                                error={validationErrors.title ?? undefined}
+                                                invalid={validationErrors.title != null}
+                                            />
 
-                                            return (
-                                                <ManageRundownItems
-                                                    rundown={rundown}
-                                                    readOnly={editingDisallowed}
-                                                    items={rundownItems}
-                                                    initiateCreation={(initialData, insertAtIndex) => {
-                                                        this.initiateCreation(
-                                                            this.props.rundownId,
-                                                            initialData,
-                                                            insertAtIndex,
-                                                        );
-                                                    }}
-                                                    initiateEditing={({_id}) => this.initiateEditing(_id)}
-                                                    initiatePreview={({_id}) => this.initiatePreview(_id)}
-                                                    onChange={(val) => {
-                                                        this.setRundownField({
-                                                            items: val.map(({_id}) => ({_id: _id})),
-                                                        });
-                                                    }}
-                                                    onDelete={(_item) => {
-                                                        this.setRundownField({
-                                                            items: rundown.items.filter(
-                                                                ({_id}) => _id !== _item._id,
-                                                            ),
-                                                        });
-                                                    }}
-                                                />
-                                            );
-                                        }}
-                                    </WithLiveResources>
-                                </div>
-                            </Layout.AuthoringMain>
-                        </Layout.MainPanel>
+                                            <SpacerBlock v gap="16" />
+
+                                            <WithLiveResources
+                                                resources={[
+                                                    {
+                                                        resource: 'rundown_items',
+                                                        ids: rundown.items.map(({_id: id}) => id),
+                                                    },
+                                                ]}
+                                            >
+                                                {(res) => {
+                                                    const rundownItems: Array<IRundownItem> = res[0]._items;
+
+                                                    return (
+                                                        <ManageRundownItems
+                                                            rundown={rundown}
+                                                            readOnly={editingDisallowed}
+                                                            items={rundownItems}
+                                                            initiateCreation={(initialData, insertAtIndex) => {
+                                                                this.initiateCreation(
+                                                                    this.props.rundownId,
+                                                                    initialData,
+                                                                    insertAtIndex,
+                                                                );
+                                                            }}
+                                                            initiateEditing={({_id}) => this.initiateEditing(_id)}
+                                                            initiatePreview={({_id}) => this.initiatePreview(_id)}
+                                                            onChange={(val) => {
+                                                                this.setRundownField({
+                                                                    items: val.map(({_id}) => ({_id: _id})),
+                                                                });
+                                                            }}
+                                                            onDelete={(_item) => {
+                                                                this.setRundownField({
+                                                                    items: rundown.items.filter(
+                                                                        ({_id}) => _id !== _item._id,
+                                                                    ),
+                                                                });
+                                                            }}
+                                                        />
+                                                    );
+                                                }}
+                                            </WithLiveResources>
+                                        </div>
+                                    </Layout.AuthoringMain>
+                                </Layout.MainPanel>
+                            )
+                        }
 
                         <Layout.RightPanel open={rundownItemAction != null}>
                             <Layout.Panel side="right" background="grey" size="x-large">
@@ -615,6 +621,23 @@ export class RundownViewEditComponent extends React.PureComponent<IProps, IState
                                                                     }}
                                                                     type="primary"
                                                                     disabled={hasUnsavedChanges() !== true}
+                                                                />
+                                                            ),
+                                                        });
+                                                    }
+
+                                                    if (rundownItemAction.type !== 'preview') {
+                                                        actions.push({
+                                                            availableOffline: false,
+                                                            group: 'end',
+                                                            priority: 0.1,
+                                                            component: () => (
+                                                                <Button
+                                                                    text={gettext('hide list')}
+                                                                    onClick={() => {
+                                                                        this.setState({rundownsListHidden: true});
+                                                                    }}
+                                                                    type="primary"
                                                                 />
                                                             ),
                                                         });
