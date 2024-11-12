@@ -1505,7 +1505,7 @@ export class AuthoringReact<T extends IBaseRestApiResponse> extends React.PureCo
                                         headerPadding={{top: 8}}
                                         authoringHeader={(
                                             <div style={{width: '100%'}}>
-                                                <div className="authoring-header__general-info">
+                                                {/* <div className="authoring-header__general-info">
                                                     <ContentProfileDropdown
                                                         item={state.itemWithChanges}
                                                         reinitialize={(item) => {
@@ -1518,7 +1518,7 @@ export class AuthoringReact<T extends IBaseRestApiResponse> extends React.PureCo
                                                             }
                                                         }}
                                                     />
-                                                </div>
+                                                </div> */}
                                                 <AuthoringSection
                                                     fields={state.profile.header}
                                                     fieldsData={state.fieldsDataWithChanges}
