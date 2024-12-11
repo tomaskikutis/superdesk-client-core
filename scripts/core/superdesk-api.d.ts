@@ -311,6 +311,15 @@ declare module 'superdesk-api' {
     };
     export type ITimeUserPreferences = never;
 
+    // AUTHORING-REACT FIELD TYPES - datetime
+
+    export type IDateTimeValueOperational = string; // ISO 8601, 13:59:01.123
+    export type IDateTimeValueStorage = IDateTimeValueOperational;
+    export interface IDateTimeFieldConfig extends ICommonFieldConfig {
+        allowSeconds?: boolean;
+    };
+    export type IDateTimeUserPreferences = never;
+
     // AUTHORING-REACT FIELD TYPES - tag input
 
     export type ITagInputValueOperational = Array<string> | null;
@@ -3079,7 +3088,6 @@ declare module 'superdesk-api' {
                 referenceElement: HTMLElement,
                 placement: import('@popperjs/core').Placement,
                 Component: React.ComponentType<{closePopup(): void}>,
-                zIndex?: number,
                 closeOnHoverEnd?: boolean,
                 onClose?: () => void,
             ): {close: () => void};

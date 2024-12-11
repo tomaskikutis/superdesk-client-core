@@ -109,7 +109,6 @@ import {
     LockInfo,
 } from 'apps/authoring-react/subcomponents/lock-info-generic';
 import {tryLocking, tryUnlocking} from './helpers/locking-helpers';
-import {showPopup} from './ui/components/popupNew';
 import {Card} from './ui/components/Card';
 import {getTextColor} from './helpers/utils';
 import {showModal} from '@superdesk/common';
@@ -121,6 +120,7 @@ import {getSortedFields, getSortedFieldsFiltered} from 'apps/authoring/preview/u
 import {editor3ToOperationalFormat} from 'apps/authoring-react/fields/editor3';
 import {prepareSuperdeskQuery} from './helpers/universal-query';
 import {ui} from './ui-utils';
+import {showPopup} from 'superdesk-ui-framework/react';
 
 export function openArticle(
     id: IArticle['_id'],
