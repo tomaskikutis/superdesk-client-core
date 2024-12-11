@@ -120,6 +120,7 @@ import {getLabelNameResolver} from 'apps/workspace/helpers/getLabelForFieldId';
 import {getSortedFields, getSortedFieldsFiltered} from 'apps/authoring/preview/utils';
 import {editor3ToOperationalFormat} from 'apps/authoring-react/fields/editor3';
 import {prepareSuperdeskQuery} from './helpers/universal-query';
+import {ui} from './ui-utils';
 
 export function openArticle(
     id: IArticle['_id'],
@@ -418,6 +419,7 @@ export function getSuperdeskApiImplementation(
                 title: title ?? gettext('Confirm'),
                 message,
             }),
+            prompt: ui.prompt,
             showIgnoreCancelSaveDialog,
             notify: notify,
             framework: {
